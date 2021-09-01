@@ -1,0 +1,56 @@
+---
+# tasks file for mc_overviewer
+- name: Installing Overviewer for Fedora / CentOS
+  block:
+    - name: Enable EPEL to get a release of Python 3
+      yum_repository:
+        name: epel-repo
+        baseurl: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+    - name: Add the Overviewer repository to yum
+      get_url:
+        url: https://overviewer.org/rpms/overviewer.repo
+        dest: /etc/yum.repos.d/overviewer.repo
+    - name: Install the Overviewer
+      yum:
+        name: Minecraft-Overviewer
+        state: present
+        update_cache: yes
+    - name: Ensure overviewer conf is set
+      template:
+        src: conf.j2
+        dest: /tmp/overviewer.conf
+    - name: Execute overviewer
+      shell: overviewer.py --config=/tmp/overviewer.conf
+  when: ansible_facts['os_family'] == "RedHat"  
+
+- name: Installing Overviewer for Debian / Ubuntu
+  block:
+    - name: Ensure apt-transport-https is installed
+      apt:
+        name: apt-transport-https
+        state: present
+        update_cache: yes
+    - name: Add the Overviewer repository to the apt sources list
+      lineinfile:
+        path: /etc/apt/sources.list
+        state: present
+        insertafter: EOF
+        line: deb https://overviewer.org/debian ./
+    - name: Install key for signed repository
+      apt_key:
+        url: https://overviewer.org/debian/overviewer.gpg.asc
+        state: present
+    - name: Install the Overviewer
+      apt: 
+        name: minecraft-overviewer
+        state: present
+        update_cache: yes
+    - name: Ensure overviewer conf is set
+      template:
+        src: conf.j2
+        dest: /tmp/overviewer.conf
+    - name: Execute overviewer
+      shell: overviewer.py --config=/tmp/overviewer.conf
+  when: ansible_facts['os_family'] == "Debian"
+
+

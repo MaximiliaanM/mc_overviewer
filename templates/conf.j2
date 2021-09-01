@@ -1,0 +1,14 @@
+{{ % for world in worlds % }}
+worlds["{{ world.name }}"] = "{{ world.path }}"
+
+renders["{{ world.render }}"] = {
+    "world": "{{ world.name }}",
+    "title": "{{ world.title }}",
+}
+
+{{ % endfor % }}
+outputdir = "{{ outputdir }}"
+
+
+
+        
